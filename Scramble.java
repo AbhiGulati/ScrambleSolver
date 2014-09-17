@@ -26,10 +26,10 @@
 import java.util.HashSet;
 import java.util.Map;
 
-char[][] boardChars = {{'g','g','v','c'},
-                      {'r','e','i','r'},
-                      {'e','s','t','a'},
-                      {'t','d','l','j'}};
+char[][] boardChars = {{'w','a','i','n'},
+                      {'p','l','n','t'},
+                      {'i','a','s','a'},
+                      {'y','f','t','r'}};
 
 char[] letters = {'a','b','c','d','e','f','g','h','i','j','k',
 'l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
@@ -53,32 +53,56 @@ void setup() {
     board = new Board(boardChars);
 	wordDisplay = new WordDisplay();
 	
-	words = new String[13595]; // was 170491
-    setupDict("dict5OrLess.txt");
-    
-	root = new Prefix(0,13594,"");
-
-    /*Sequence seq;
-    Tile[][] grid = board.grid;
-    seq = new Sequence(new Tile[]{grid[0][2]});
-    
-    board.consider(seq); */
+	/* setting some constants based on which dict I'm using;
+		right now I'm sticking to the _OrLess dicts */
+	int[] dictSizeByMaxWordLen = new int[]{0,0,0,1066,4965,13595,28817,51922,80339,105212,125512,141016};
+	int maxWordLen = 11;
+	String fileName = "dict" + maxWordLen + "OrLess.txt";
+	int dictSize = dictSizeByMaxWordLen[maxWordLen];
 	
-	for(int i=0; i<4; i++)
+	/* Setting up dictionary; and timing */
+	{int dictStart = millis();
+	words = new String[dictSize]; // was 170491
+    setupDict(fileName);
+	int dictEnd = millis();
+	println("time for dict", dictEnd - dictStart);}
+    
+	/* Setting up Prefixes; and timing */
+	{int preStart = millis();
+	root = new Prefix(0,dictSize-1,"");
+	println("numPrefixes=", numPrefixes);
+	int preEnd = millis();
+	println("time for Pres", preEnd - preStart);}
+	
+	/* running Board.consider() on each tile in the grid 
+		ie find all words that start with that tile */
+	{for(int i=0; i<4; i++)
 		for(int j=0; j<4; j++) 
-			board.consider(new Sequence(new Tile[]{board.grid[i][j]}));
+			board.consider(new Sequence(new Tile[]{board.grid[i][j]}));}
 		
+	HashMap<String, ScoredSequence> bestScore = board.bestScore; // pointless shortcut name
+	StringList wordList = new StringList();
 	
-	/* temp code */
-	HashMap<String, ScoredSequence> bestScore = board.bestScore;
-	for(String key : bestScore.keySet()) {
-		ScoredSequence ss = bestScore.get(key);
-		//println(key, ss.score);
+	/* put all the found words into a sorted StringList */
+	{for(String key : bestScore.keySet()) {
+		wordList.append(key);
 	}
+	wordList.sort();}
 	
+	/* write the sorted StringList to file "boardsamplefound.txt" */
+	PrintWriter output = createWriter("boardsamplefoundSorted.txt");
+	for(String word : wordList) {
+		output.println(word);
+	}
+	output.flush();
+	output.close();
+	
+	println();	
 	int numWords = bestScore.keySet().size();
-	print(numWords);
-	/* end temp */
+	println(numWords); 
+	
+	println(bestScore.get("lips")==null);
+	 
 }
 
 void draw() {
@@ -327,10 +351,17 @@ class Sequence {
     
     int findScore() {
         int score = 0;
-        for(Tile t : tiles) {
-            score += pointsByLetter.get(t.letter);
-        }        
-        return score;
+		
+		if(!this.isValid()) {
+			println("invalid sequence");
+		} else {
+			if(tiles.size()==2) return 1;
+			
+			for(Tile t : tiles) {
+				score += pointsByLetter.get(t.letter);
+			}        
+		}
+		return score;
     }
     
     String getWord() {
@@ -376,12 +407,12 @@ class Prefix {
 		longerWords = new HashMap<Character, Prefix>();
 
         String firstWord = words[start];
-        String lastWord = words[end];
+        String lastWord = words[end];		
         //println(wordSoFar, start, firstWord, end, lastWord);
         
 		if(wordSoFar.equals(firstWord)) isWord = true;
 
-        if(wordSoFar.length()<=4) {
+        if(wordSoFar.length()<=9) {
             setupLongerWords();
             //println(wordSoFar, start, firstWord, end, lastWord, longerWords.size());
         }
