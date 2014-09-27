@@ -4,7 +4,15 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.Comparator;
 
-char[] boardChars = {'w','a','i','n','p','l','n','t','i','a','s','a','y','f','t','r'};
+String boardChars = "bkgteuedcaletbsr"; 
+/* missing:  */
+
+/* Word length bonuses: 
+7 -> 10
+6 -> 6
+5 -> 3
+
+*/
 
 char[] letters = {'a','b','c','d','e','f','g','h','i','j','k',
 'l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
@@ -31,7 +39,7 @@ void setup() {
     /* setting some constants based on which dict I'm using;
         right now I'm sticking to the _OrLess dicts */
     int[] dictSizeByMaxWordLen = new int[]{0,0,0,1066,4965,13595,28817,51922,80339,105212,125512,141016};
-    int maxWordLen = 6;
+    int maxWordLen = 10;
     String fileName = "dict" + maxWordLen + "OrLess.txt";
     int dictSize = dictSizeByMaxWordLen[maxWordLen];
     
@@ -39,44 +47,6 @@ void setup() {
     {int dictStart = millis();
     words = new String[dictSize]; // was 170491
     setupDict(fileName);
-<<<<<<< HEAD
-	int dictEnd = millis();
-	println("time for dict", dictEnd - dictStart);}
-    
-	/* Setting up Prefixes; and timing */
-	{int preStart = millis();
-	root = new Prefix(0,dictSize-1,"");
-	println("numPrefixes=", numPrefixes);
-	int preEnd = millis();
-	println("time for Pres", preEnd - preStart);}
-	
-	/* running Board.consider() on each tile in the grid 
-		ie find all words that start with that tile */
-	{for(int i=0; i<4; i++)
-		for(int j=0; j<4; j++) 
-			board.consider(new Sequence(new Tile[]{board.grid[i][j]}));}
-		
-	HashMap<String, ScoredSequence> bestScore = board.bestScore; // pointless shortcut name
-	StringList wordList = new StringList();
-	
-	/* put all the found words into a sorted StringList */
-	{for(String key : bestScore.keySet()) {
-		wordList.append(key);
-	}
-	wordList.sort();}
-	
-	/* write the sorted StringList to file "boardsamplefound.txt" */
-	PrintWriter output = createWriter("boardsamplefoundSorted.txt");
-	for(String word : wordList) {
-		output.println(word);
-	}
-	output.flush();
-	output.close();
-	
-	int numWords = bestScore.keySet().size();
-	println("number of words found = ", numWords); 
-	 
-=======
     int dictEnd = millis();
     println("time for dict", dictEnd - dictStart);}
     
@@ -103,13 +73,6 @@ void setup() {
     }
     }
     
-    
-    /*for(int i=0; i<bestScoreArray.length; i++) {
-        ScoredSequence ss = bestScoreArray[i];
-        println(ss.score, ss.wordSoFar);
-    }
-    println();*/
-    
     Arrays.sort(bestScoreArray, new SSComparator());
 
     for(int i=0; i<bestScoreArray.length; i++) {
@@ -118,8 +81,8 @@ void setup() {
     }
     println();
     
-    /* write the sorted StringList to file "boardsamplefound.txt" */
-    /*PrintWriter output = createWriter("boardsamplefoundSorted.txt");
+    /* write the sorted StringList to file "boardsamplefound.txt" 
+    PrintWriter output = createWriter("boardsamplefoundSorted.txt");
     for(String word : wordList) {
         output.println(word);
     }
@@ -129,7 +92,6 @@ void setup() {
     int numWords = bestScore.keySet().size();
     println("number of words found = ", numWords); 
      
->>>>>>> origin/master
 }
 
 void draw() {
@@ -139,15 +101,6 @@ void draw() {
 
 
 class ScoredSequence {
-<<<<<<< HEAD
-	Sequence seq;
-	int score;
-	
-	ScoredSequence(Sequence seq, int score) {
-		this.seq = seq;
-		this.score = score;
-	}
-=======
     Sequence seq;
     int score;
     String wordSoFar;
@@ -158,7 +111,6 @@ class ScoredSequence {
         
         wordSoFar = seq.getWord();
     }
->>>>>>> origin/master
 }
 
 class Board {
@@ -168,12 +120,8 @@ class Board {
 
     HashMap<String, ScoredSequence> bestScore;
   
-    Board(char[] boardCharsPassed) {
-<<<<<<< HEAD
-		/* dimensions in designated area of window */
-=======
+    Board(String boardCharsPassed) {
         /* dimensions in designated area of window */
->>>>>>> origin/master
         x = .1*bWidth; y = .1*bHeight;
         w = .8*bWidth; h = .8*bHeight;
         
@@ -181,7 +129,7 @@ class Board {
         grid = new Tile[4][4];
         for(int i=0; i<4; i++) 
             for(int j=0; j<4; j++) 
-                grid[i][j] = new Tile(j, i, coordsOf(j, i), boardCharsPassed[4*i+j]);
+                grid[i][j] = new Tile(j, i, coordsOf(j, i), boardCharsPassed.charAt(4*i+j));
         setupNeighbors();
         
         /* initialize bestScore */
@@ -190,51 +138,6 @@ class Board {
     
     void consider(Sequence seq) {
         if(!seq.isValid()) println("invalid sequence");
-<<<<<<< HEAD
-		
-		String wordSoFar = seq.getWord();
-		Prefix pre = root.proceed(wordSoFar);
-		if(pre.isWord) {
-			/*println("this sequence made the word ", wordSoFar);*/
-			ScoredSequence old = bestScore.get(wordSoFar);
-			if(old == null) {
-				bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));	
-			} else {
-				if(seq.findScore() > old.score) {
-					bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));	
-				}
-			}
-		}
-		
-		
-		/*println("about this Prefix: ", "wordSoFar=" + pre.wordSoFar, str(pre.start)+"="+words[pre.start], str(pre.end)+"="+words[pre.end]); */
-		
-		Tile lastTile = seq.getLast();
-		HashSet<Character> nextLetters = new HashSet(pre.longerWords.keySet());
-		ArrayList<Tile> nbrsToTry = new ArrayList<Tile>(lastTile.neighbors);
-		
-		for(int n=nbrsToTry.size()-1; n>=0; n--) {
-			Tile tst = nbrsToTry.get(n);
-			if(nextLetters.contains(tst.letter) && seq.tiles.indexOf(tst)==-1) {
-				//println(tst.col, tst.row, tst.letter);
-				ArrayList<Tile> ext_tiles = new ArrayList<Tile>(seq.tiles);
-				ext_tiles.add(tst);
-				Sequence extension = new Sequence(ext_tiles);
-				consider(extension);
-			}
-		}
-		
-		
-	/*	for(Tile nb : lastTile.neighbors) {
-			if(nextLetters.contains(nb.letter) && seq.tiles.indexOf(nb)==-1) {
-				println(nb.letter);
-			}
-		} */ 
-/* 		for(char ch : pre.longerWords.keySet()) {
-			Prefix ext = pre.longerWords.get(ch);
-			println(words[ext.start]);
-		} */
-=======
         
         String wordSoFar = seq.getWord();
         Prefix pre = root.proceed(wordSoFar);
@@ -278,7 +181,6 @@ class Board {
             Prefix ext = pre.longerWords.get(ch);
             println(words[ext.start]);
         } */
->>>>>>> origin/master
     }
         
     
@@ -583,33 +485,6 @@ void setupDict(String fileName) {
     
 }
 
-
-void setupDict(String fileName) {
-	BufferedReader reader;
-	String line;
-
-	reader = createReader(fileName);
-	
-    int n=0;
-    
-    try {
-        while((line=reader.readLine()) != null) {
-            words[n] = line;
-            n++;
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-	
-	int[] points = {1, 4, 4, 2, 1, 4, 3, 3, 1, 10, 5, 2, 4, 2, 1, 4, 10, 1, 1, 1, 2, 5, 4, 8, 3, 10};
-	pointsByLetter = new HashMap<Character, Integer>();
-	
-	for(int i=0; i<26; i++) {
-		pointsByLetter.put(letters[i], points[i]);
-	}
-	
-}
-
 void line(PVector p1, PVector p2) {
     line(p1.x, p1.y, p2.x, p2.y);
 }
@@ -641,8 +516,4 @@ void arrow(PVector p1, PVector p2) {
     line(mid, cowise);
 }
 
-<<<<<<< HEAD
-=======
 
-
->>>>>>> origin/master
