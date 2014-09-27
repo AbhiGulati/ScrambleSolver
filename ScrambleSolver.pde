@@ -1,6 +1,8 @@
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Arrays;
+import java.util.Comparator;
 
 char[] boardChars = {'w','a','i','n','p','l','n','t','i','a','s','a','y','f','t','r'};
 
@@ -17,26 +19,27 @@ String[] words; /* Array of all the dictionary words, in alphabetical order */
 Prefix root;
 int numPrefixes = 0;
 
-int bHeight = 400; /* dimensions of the */
-int bWidth = 400; /*       BOARD       */
+int bHeight = 400;
+int bWidth = 400; 
 
 void setup() {
     size(600,400);
-	
+    
     board = new Board(boardChars);
-	wordDisplay = new WordDisplay();
-	
-	/* setting some constants based on which dict I'm using;
-		right now I'm sticking to the _OrLess dicts */
-	int[] dictSizeByMaxWordLen = new int[]{0,0,0,1066,4965,13595,28817,51922,80339,105212,125512,141016};
-	int maxWordLen = 11;
-	String fileName = "dict" + maxWordLen + "OrLess.txt";
-	int dictSize = dictSizeByMaxWordLen[maxWordLen];
-	
-	/* Setting up dictionary; and timing */
-	{int dictStart = millis();
-	words = new String[dictSize]; // was 170491
+    wordDisplay = new WordDisplay();
+    
+    /* setting some constants based on which dict I'm using;
+        right now I'm sticking to the _OrLess dicts */
+    int[] dictSizeByMaxWordLen = new int[]{0,0,0,1066,4965,13595,28817,51922,80339,105212,125512,141016};
+    int maxWordLen = 6;
+    String fileName = "dict" + maxWordLen + "OrLess.txt";
+    int dictSize = dictSizeByMaxWordLen[maxWordLen];
+    
+    /* Setting up dictionary; and timing */
+    {int dictStart = millis();
+    words = new String[dictSize]; // was 170491
     setupDict(fileName);
+<<<<<<< HEAD
 	int dictEnd = millis();
 	println("time for dict", dictEnd - dictStart);}
     
@@ -73,15 +76,70 @@ void setup() {
 	int numWords = bestScore.keySet().size();
 	println("number of words found = ", numWords); 
 	 
+=======
+    int dictEnd = millis();
+    println("time for dict", dictEnd - dictStart);}
+    
+    /* Setting up Prefixes; and timing */
+    {int preStart = millis();
+    root = new Prefix(0,dictSize-1,"");
+    println("numPrefixes=", numPrefixes);
+    int preEnd = millis();
+    println("time for Pres", preEnd - preStart);}
+    
+    /* running Board.consider() on each tile in the grid 
+        ie find all words that start with that tile */
+    {for(int i=0; i<4; i++)
+        for(int j=0; j<4; j++) 
+            board.consider(new Sequence(new Tile[]{board.grid[i][j]}));}
+        
+    HashMap<String, ScoredSequence> bestScore = board.bestScore; // pointless shortcut name
+    ScoredSequence[] bestScoreArray = new ScoredSequence[bestScore.keySet().size()];
+    
+    {int i=0;
+    for(String word : bestScore.keySet()) {
+        bestScoreArray[i] = bestScore.get(word);
+        i++;
+    }
+    }
+    
+    
+    /*for(int i=0; i<bestScoreArray.length; i++) {
+        ScoredSequence ss = bestScoreArray[i];
+        println(ss.score, ss.wordSoFar);
+    }
+    println();*/
+    
+    Arrays.sort(bestScoreArray, new SSComparator());
+
+    for(int i=0; i<bestScoreArray.length; i++) {
+        ScoredSequence ss = bestScoreArray[i];
+        println(ss.score, ss.wordSoFar);
+    }
+    println();
+    
+    /* write the sorted StringList to file "boardsamplefound.txt" */
+    /*PrintWriter output = createWriter("boardsamplefoundSorted.txt");
+    for(String word : wordList) {
+        output.println(word);
+    }
+    output.flush();
+    output.close();*/
+    
+    int numWords = bestScore.keySet().size();
+    println("number of words found = ", numWords); 
+     
+>>>>>>> origin/master
 }
 
 void draw() {
     board.display();
-	wordDisplay.display();
+    wordDisplay.display();
 }
 
 
 class ScoredSequence {
+<<<<<<< HEAD
 	Sequence seq;
 	int score;
 	
@@ -89,33 +147,50 @@ class ScoredSequence {
 		this.seq = seq;
 		this.score = score;
 	}
+=======
+    Sequence seq;
+    int score;
+    String wordSoFar;
+    
+    ScoredSequence(Sequence seq, int score) {
+        this.seq = seq;
+        this.score = score;
+        
+        wordSoFar = seq.getWord();
+    }
+>>>>>>> origin/master
 }
 
 class Board {
     float x, y, w, h; // bounding rectangle
     Tile[][] grid;
-	
+    
 
-	HashMap<String, ScoredSequence> bestScore;
+    HashMap<String, ScoredSequence> bestScore;
   
     Board(char[] boardCharsPassed) {
+<<<<<<< HEAD
 		/* dimensions in designated area of window */
+=======
+        /* dimensions in designated area of window */
+>>>>>>> origin/master
         x = .1*bWidth; y = .1*bHeight;
         w = .8*bWidth; h = .8*bHeight;
         
-		/* make the tiles and set up neighbor relations */
+        /* make the tiles and set up neighbor relations */
         grid = new Tile[4][4];
         for(int i=0; i<4; i++) 
             for(int j=0; j<4; j++) 
                 grid[i][j] = new Tile(j, i, coordsOf(j, i), boardCharsPassed[4*i+j]);
         setupNeighbors();
-		
-		/* initialize bestScore */
-		bestScore = new HashMap<String, ScoredSequence>();
+        
+        /* initialize bestScore */
+        bestScore = new HashMap<String, ScoredSequence>();
     }
     
     void consider(Sequence seq) {
         if(!seq.isValid()) println("invalid sequence");
+<<<<<<< HEAD
 		
 		String wordSoFar = seq.getWord();
 		Prefix pre = root.proceed(wordSoFar);
@@ -159,6 +234,51 @@ class Board {
 			Prefix ext = pre.longerWords.get(ch);
 			println(words[ext.start]);
 		} */
+=======
+        
+        String wordSoFar = seq.getWord();
+        Prefix pre = root.proceed(wordSoFar);
+        if(pre.isWord) {
+            /*println("this sequence made the word ", wordSoFar);*/
+            ScoredSequence old = bestScore.get(wordSoFar);
+            if(old == null) {
+                bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));    
+            } else {
+                if(seq.findScore() > old.score) {
+                    bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));    
+                }
+            }
+        }
+        
+        
+        /*println("about this Prefix: ", "wordSoFar=" + pre.wordSoFar, str(pre.start)+"="+words[pre.start], str(pre.end)+"="+words[pre.end]); */
+        
+        Tile lastTile = seq.getLast();
+        HashSet<Character> nextLetters = new HashSet(pre.longerWords.keySet());
+        ArrayList<Tile> nbrsToTry = new ArrayList<Tile>(lastTile.neighbors);
+        
+        for(int n=nbrsToTry.size()-1; n>=0; n--) {
+            Tile tst = nbrsToTry.get(n);
+            if(nextLetters.contains(tst.letter) && seq.tiles.indexOf(tst)==-1) {
+                //println(tst.col, tst.row, tst.letter);
+                ArrayList<Tile> ext_tiles = new ArrayList<Tile>(seq.tiles);
+                ext_tiles.add(tst);
+                Sequence extension = new Sequence(ext_tiles);
+                consider(extension);
+            }
+        }
+        
+        
+    /*    for(Tile nb : lastTile.neighbors) {
+            if(nextLetters.contains(nb.letter) && seq.tiles.indexOf(nb)==-1) {
+                println(nb.letter);
+            }
+        } */ 
+/*         for(char ch : pre.longerWords.keySet()) {
+            Prefix ext = pre.longerWords.get(ch);
+            println(words[ext.start]);
+        } */
+>>>>>>> origin/master
     }
         
     
@@ -242,13 +362,13 @@ class Tile {
         arc(x+hs-r, y+hs-r, 2*r, 2*r, 0, PI/2);
         arc(x-hs+r, y+hs-r, 2*r, 2*r, PI/2, PI);
         }
-		
+        
         /* fill rest of inside */ {
         noStroke();
         rect(x-hs, y-hs+r, 2*hs, 2*(hs-r));
         rect(x-hs+r, y-hs, 2*(hs-r), 2*hs);
         }
-		
+        
         /* straight parts of border */ {
         stroke(1);
         line(x-hs, y-hs+r, x-hs, y+hs-r);
@@ -256,17 +376,17 @@ class Tile {
         line(x+hs-r, y+hs, x-hs+r, y+hs);
         line(x+hs-r, y-hs, x-hs+r, y-hs);
         }
-		
-		/* letter and points */ {
+        
+        /* letter and points */ {
         fill(0);
         textSize(20);
-		String disp = str(letter);
-		disp = disp.toUpperCase();
-		if(disp.equals("Q")) disp = "Qu";
+        String disp = str(letter);
+        disp = disp.toUpperCase();
+        if(disp.equals("Q")) disp = "Qu";
         text(disp, location.x, location.y - 3);
         textSize(12);
         text(pointsByLetter.get(letter), location.x + 16, location.y + 16);
-		}
+        }
     }
         
 }
@@ -277,12 +397,12 @@ class Sequence {
     Sequence(ArrayList<Tile> tiles) {
         this.tiles = tiles;
     }
-	
-	Sequence(Tile[] tiles) {
+    
+    Sequence(Tile[] tiles) {
         this.tiles = new ArrayList<Tile>();
-		for(int i=0; i<tiles.length; i++) {
-			(this.tiles).add(tiles[i]);
-		}
+        for(int i=0; i<tiles.length; i++) {
+            (this.tiles).add(tiles[i]);
+        }
     }
     
     boolean isValid() {
@@ -301,24 +421,24 @@ class Sequence {
     
     int findScore() {
         int score = 0;
-		
-		if(!this.isValid()) {
-			println("invalid sequence");
-		} else {
-			if(tiles.size()==2) return 1;
-			
-			for(Tile t : tiles) {
-				score += pointsByLetter.get(t.letter);
-			}        
-		}
-		return score;
+        
+        if(!this.isValid()) {
+            println("invalid sequence");
+        } else {
+            if(tiles.size()==2) return 1;
+            
+            for(Tile t : tiles) {
+                score += pointsByLetter.get(t.letter);
+            }        
+        }
+        return score;
     }
     
     String getWord() {
         String word = "";
         for(int i=0; i < tiles.size(); i++) {
-			String disp = str(tiles.get(i).letter);
-			if(disp.equals("q")) disp = "qu";
+            String disp = str(tiles.get(i).letter);
+            if(disp.equals("q")) disp = "qu";
             word = word + disp;
         }
         return word;
@@ -330,16 +450,16 @@ class Sequence {
         }
     }
     
-	Tile getLast() {
-		int n = tiles.size();
-		return tiles.get(n-1);
-	}
-	
-	Sequence extend(Tile newTile) {
-		ArrayList<Tile> newTileList = new ArrayList<Tile>(tiles);
-		newTileList.add(newTile);
-		return new Sequence(newTileList);
-	}
+    Tile getLast() {
+        int n = tiles.size();
+        return tiles.get(n-1);
+    }
+    
+    Sequence extend(Tile newTile) {
+        ArrayList<Tile> newTileList = new ArrayList<Tile>(tiles);
+        newTileList.add(newTile);
+        return new Sequence(newTileList);
+    }
 }
 
 class Prefix {
@@ -354,13 +474,13 @@ class Prefix {
         this.start = start;
         this.end = end;
         this.wordSoFar = wordSoFar;
-		longerWords = new HashMap<Character, Prefix>();
+        longerWords = new HashMap<Character, Prefix>();
 
         String firstWord = words[start];
-        String lastWord = words[end];		
+        String lastWord = words[end];        
         //println(wordSoFar, start, firstWord, end, lastWord);
         
-		if(wordSoFar.equals(firstWord)) isWord = true;
+        if(wordSoFar.equals(firstWord)) isWord = true;
 
         if(wordSoFar.length()<=9) {
             setupLongerWords();
@@ -374,13 +494,13 @@ class Prefix {
         
         int k = wordSoFar.length()+1;  // k represents the length of any prefix created by this one
           
-		int n=start; //index as I go through words
-		int lastEnd = start-1; //end of the last prefix made  
-		if(wordSoFar.equals(firstWord)) { //this prefix is a word
-			n++;
-			lastEnd++;
+        int n=start; //index as I go through words
+        int lastEnd = start-1; //end of the last prefix made  
+        if(wordSoFar.equals(firstWord)) { //this prefix is a word
+            n++;
+            lastEnd++;
         }
-		
+        
         for(char i : letters) {
             while(n<=end && words[n].length()>=k && words[n].charAt(k-1)==i) {
                 n++;
@@ -403,31 +523,64 @@ class Prefix {
         return curr;
     }
     
-	int countExtensions() {
-		return longerWords.size();
-	}
-	
-	void printNextLetters() {
-		println(longerWords.keySet().toString());
-	}
+    int countExtensions() {
+        return longerWords.size();
+    }
+    
+    void printNextLetters() {
+        println(longerWords.keySet().toString());
+    }
 }
 
 class WordDisplay {
-	float x, y, w, h; // bounding rectangle
-	ArrayList<Sequence> seqsForWords;
-	
-	WordDisplay() {
-		x = bWidth + .1*(width - bWidth);
-		y = .1*height;
-		w = .8*(width - bWidth);
-		h = .8*height;
-		seqsForWords = new ArrayList<Sequence>();
-	}
-	
-	void display() {
-		fill(255);
+    float x, y, w, h; // bounding rectangle
+    ArrayList<Sequence> seqsForWords;
+    
+    WordDisplay() {
+        x = bWidth + .1*(width - bWidth);
+        y = .1*height;
+        w = .8*(width - bWidth);
+        h = .8*height;
+        seqsForWords = new ArrayList<Sequence>();
+    }
+    
+    void display() {
+        fill(255);
         rect(x, y, w, h);
-	}
+    }
+}
+
+class SSComparator implements Comparator<ScoredSequence> {
+    int compare(ScoredSequence a, ScoredSequence b) {
+        return b.score - a.score;
+    }
+}
+
+
+void setupDict(String fileName) {
+    BufferedReader reader;
+    String line;
+
+    reader = createReader(fileName);
+    
+    int n=0;
+    
+    try {
+        while((line=reader.readLine()) != null) {
+            words[n] = line;
+            n++;
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+    
+    int[] points = {1, 4, 4, 2, 1, 4, 3, 3, 1, 10, 5, 2, 4, 2, 1, 4, 10, 1, 1, 1, 2, 5, 4, 8, 3, 10};
+    pointsByLetter = new HashMap<Character, Integer>();
+    
+    for(int i=0; i<26; i++) {
+        pointsByLetter.put(letters[i], points[i]);
+    }
+    
 }
 
 
@@ -488,3 +641,8 @@ void arrow(PVector p1, PVector p2) {
     line(mid, cowise);
 }
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> origin/master
