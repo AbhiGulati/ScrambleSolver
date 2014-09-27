@@ -2,10 +2,7 @@
 import java.util.HashSet;
 import java.util.Map;
 
-char[][] boardChars = {{'w','a','i','n'},
-                      {'p','l','n','t'},
-                      {'i','a','s','a'},
-                      {'y','f','t','r'}};
+char[] boardChars = {'w','a','i','n','p','l','n','t','i','a','s','a','y','f','t','r'};
 
 char[] letters = {'a','b','c','d','e','f','g','h','i','j','k',
 'l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
@@ -73,11 +70,8 @@ void setup() {
 	output.flush();
 	output.close();
 	
-	println();	
 	int numWords = bestScore.keySet().size();
-	println(numWords); 
-	
-	println(bestScore.get("lips")==null);
+	println("number of words found = ", numWords); 
 	 
 }
 
@@ -86,32 +80,6 @@ void draw() {
 	wordDisplay.display();
 }
 
-
-void setupDict(String fileName) {
-	BufferedReader reader;
-	String line;
-
-	reader = createReader(fileName);
-	
-    int n=0;
-    
-    try {
-        while((line=reader.readLine()) != null) {
-            words[n] = line;
-            n++;
-        }
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-	
-	int[] points = {1, 4, 4, 2, 1, 4, 3, 3, 1, 10, 5, 2, 4, 2, 1, 4, 10, 1, 1, 1, 2, 5, 4, 8, 3, 10};
-	pointsByLetter = new HashMap<Character, Integer>();
-	
-	for(int i=0; i<26; i++) {
-		pointsByLetter.put(letters[i], points[i]);
-	}
-	
-}
 
 class ScoredSequence {
 	Sequence seq;
@@ -122,7 +90,6 @@ class ScoredSequence {
 		this.score = score;
 	}
 }
-	
 
 class Board {
     float x, y, w, h; // bounding rectangle
@@ -131,7 +98,7 @@ class Board {
 
 	HashMap<String, ScoredSequence> bestScore;
   
-    Board(char[][] boardCharsPassed) {
+    Board(char[] boardCharsPassed) {
 		/* dimensions in designated area of window */
         x = .1*bWidth; y = .1*bHeight;
         w = .8*bWidth; h = .8*bHeight;
@@ -140,7 +107,7 @@ class Board {
         grid = new Tile[4][4];
         for(int i=0; i<4; i++) 
             for(int j=0; j<4; j++) 
-                grid[i][j] = new Tile(j, i, coordsOf(j, i), boardCharsPassed[i][j]);
+                grid[i][j] = new Tile(j, i, coordsOf(j, i), boardCharsPassed[4*i+j]);
         setupNeighbors();
 		
 		/* initialize bestScore */
@@ -154,7 +121,14 @@ class Board {
 		Prefix pre = root.proceed(wordSoFar);
 		if(pre.isWord) {
 			/*println("this sequence made the word ", wordSoFar);*/
-			bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));	
+			ScoredSequence old = bestScore.get(wordSoFar);
+			if(old == null) {
+				bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));	
+			} else {
+				if(seq.findScore() > old.score) {
+					bestScore.put(wordSoFar, new ScoredSequence(seq, seq.findScore()));	
+				}
+			}
 		}
 		
 		
@@ -456,6 +430,33 @@ class WordDisplay {
 	}
 }
 
+
+void setupDict(String fileName) {
+	BufferedReader reader;
+	String line;
+
+	reader = createReader(fileName);
+	
+    int n=0;
+    
+    try {
+        while((line=reader.readLine()) != null) {
+            words[n] = line;
+            n++;
+        }
+    } catch (IOException e) {
+        e.printStackTrace();
+    }
+	
+	int[] points = {1, 4, 4, 2, 1, 4, 3, 3, 1, 10, 5, 2, 4, 2, 1, 4, 10, 1, 1, 1, 2, 5, 4, 8, 3, 10};
+	pointsByLetter = new HashMap<Character, Integer>();
+	
+	for(int i=0; i<26; i++) {
+		pointsByLetter.put(letters[i], points[i]);
+	}
+	
+}
+
 void line(PVector p1, PVector p2) {
     line(p1.x, p1.y, p2.x, p2.y);
 }
@@ -486,3 +487,4 @@ void arrow(PVector p1, PVector p2) {
     line(mid, cwise);
     line(mid, cowise);
 }
+
