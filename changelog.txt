@@ -1,4 +1,0 @@
-input to Board constructor now type char[]
-
-bestScores is only updated when the encountered word gives a better score
-(not tested)
