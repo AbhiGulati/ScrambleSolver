@@ -62,3 +62,4 @@ void arrow(PVector p1, PVector p2) {
     line(mid, cowise);
 }
 
+/* board = "lrdsjaeketaiursm" 381 words */
