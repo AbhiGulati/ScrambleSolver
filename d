@@ -1,0 +1,11 @@
+cups
+laces
+goals
+ache
+shoot
+slip
+lace
+goal
+shot
+ice
+ices
