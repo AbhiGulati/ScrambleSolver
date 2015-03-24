@@ -1,0 +1,5 @@
+clear button and functionality of clearing worddisplay
+: clear button is working
+
+separate making of prefixes - worth it?
+

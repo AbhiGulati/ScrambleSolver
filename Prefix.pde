@@ -1,3 +1,4 @@
+/* A Prefix represents the chunk of (consecutive) words in the dictionary starting with the given string of letters (wordSoFar) */
 class Prefix {
     boolean isWord = false;
     String wordSoFar;
@@ -23,9 +24,9 @@ class Prefix {
     
     void setupLongerWords() {
         String firstWord = words[start];
-        String lastWord = words[end];        
+        String lastWord = words[end];                
+        int k = wordSoFar.length()+1;  // k represents the length of any prefix created by this one
         
-        int k = wordSoFar.length()+1;  // k represents the length of any prefix created by this one  
         int n=start; //index as I go through words
         int lastEnd = start-1; //end of the last prefix made  
         if(wordSoFar.equals(firstWord)) { //this prefix is a word
@@ -46,6 +47,7 @@ class Prefix {
         }
     }
     
+    /* nextLetters to wordSoFar to obtain a new Prefix */
     Prefix proceed(String nextLetters) {
         Prefix curr = this;
         for(int i=0; i<nextLetters.length(); i++) {

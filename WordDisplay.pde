@@ -59,7 +59,10 @@ class WordDisplay {
         
         if(selectedIndex >= 0) 
             foundWords.get(selectedIndex).seq.drawSelf();
+    }
 
+    void clear() {
+        foundWords.clear();
     }
     
     void addWord(ScoredSequence newSeq) {
@@ -74,6 +77,10 @@ class WordDisplay {
     void stepDown() {
         if(selectedIndex+1 < foundWords.size() & ++selectedIndex == firstShown+maxWords) 
             firstShown = selectedIndex;   
+    }
+
+    boolean isEmpty() {
+        return foundWords.isEmpty();
     }    
 
 }

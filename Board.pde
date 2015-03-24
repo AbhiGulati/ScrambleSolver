@@ -27,7 +27,7 @@ class Board {
                 grid[i][j].refresh();
     }
     
-    void handleClick() {
+    void handleClick() { 
         for(Tile[] row : grid)
             for(Tile t : row) 
                 t.handleClick();
